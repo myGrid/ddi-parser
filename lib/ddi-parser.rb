@@ -15,10 +15,10 @@ module DDI
     #
     #Returns a Nesstar::Study object
     def parse ddi_file
-      catalog = Nesstar::Catalog.new
-      study = Nesstar::Study.new
+      catalog = DDI::Catalog.new
+      study = DDI::Study.new
       study_info_hash = Hash.new
-      parser = LibXML::XML::Parser.string(ddi_file)
+      parser = LibXML::XML::Parser.file(ddi_file)
       doc = parser.parse
       studynodes = doc.find('//stdyDscr')
       abstracts = studynodes[0].find('//abstract')
@@ -36,7 +36,7 @@ module DDI
       date = studynodes[0].find('//sumDscr/collDate')
       date.each do |d|
         a = d.attributes
-        study_date = Nesstar::StudyDate.new
+        study_date = DDI::StudyDate.new
         study_date.type = a.get_attribute('event').value.strip
         study_date.date = a.get_attribute('date').value.strip
         dates.push(study_date)
@@ -69,7 +69,7 @@ module DDI
       end
       vars = docnodes[0].find('//dataDscr/var')
       vars.each do |var|
-        variable = Nesstar::Variable.new
+        variable = DDI::Variable.new
         var_attr = var.attributes
         variable.id = var_attr.get_attribute('ID').value.strip unless var_attr.get_attribute('ID') == nil
         variable.name = var_attr.get_attribute('name').value.strip unless var_attr.get_attribute('name') == nil
@@ -106,7 +106,7 @@ module DDI
         stats.each do |stat|
           a = stat.attributes
           # summary_stats[a.get_attribute('type').value] = stat.first.content
-          statistic = Nesstar::SummaryStat.new
+          statistic = DDI::SummaryStat.new
           statistic.type = a.get_attribute('type').value.strip
           statistic.value = stat.first.content.strip
           summary_stats.push(statistic)
@@ -116,7 +116,7 @@ module DDI
         categories = []
         #categories in ddi are value domains in mb
         catgry.each do |cat|
-          category = Nesstar::Category.new
+          category = DDI::Category.new
           valxml = cat.find('./catValu')
           if valxml != nil && valxml[0] != nil
             category.value = valxml[0].first.content.strip unless valxml[0].first == nil
@@ -132,7 +132,7 @@ module DDI
           catstats = cat.find('./catStat')
           category_statistics = []
           catstats.each do |catstat|
-            category_statistic = Nesstar::CategoryStatistic.new
+            category_statistic = DDI::CategoryStatistic.new
             a = catstat.attributes
             if a != nil && a.get_attribute('type') != nil
               category_statistic.type = a.get_attribute('type').value.strip

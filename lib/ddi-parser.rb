@@ -1,3 +1,13 @@
+require 'rubygems'
+require 'libxml'
+require 'models/catalog'
+require 'models/category'
+require 'models/category_statistic'
+require 'models/study'
+require 'models/study_date'
+require 'models/variable'
+require 'models/summary_stat'
+
 module DDI
   class Parser
     

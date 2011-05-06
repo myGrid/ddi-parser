@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "ddi-parser/version"
+require "models/version"
 
 Gem::Specification.new do |s|
   s.name        = "ddi-parser"

@@ -5,7 +5,7 @@ require 'models/category'
 require 'models/category_statistic'
 require 'models/study'
 require 'models/study_date'
-require 'models/variable'
+require 'models/ddi_variable'
 require 'models/summary_stat'
 
 module DDI
@@ -18,7 +18,15 @@ module DDI
       catalog = DDI::Catalog.new
       study = DDI::Study.new
       study_info_hash = Hash.new
-      parser = LibXML::XML::Parser.file(ddi_file)
+      encode_type = `file --mime -br #{ddi_file}`.gsub(/\n/,"").split(';')[1].split('=')[1]
+      #have to convert to UTF-8 for libxml
+      contents = File.open(ddi_file).read
+      output = Iconv.conv("UTF-8", encode_type, contents)
+      converted_file = File.join(File.dirname(ddi_file), "converted_file.xml")
+      file = File.open(converted_file, 'w')
+      file.write(output)
+      file.close
+      parser = LibXML::XML::Parser.file(converted_file)
       doc = parser.parse
       studynodes = doc.find('//stdyDscr')
       abstracts = studynodes[0].find('//abstract')
@@ -36,15 +44,17 @@ module DDI
       date = studynodes[0].find('//sumDscr/collDate')
       date.each do |d|
         a = d.attributes
-        study_date = DDI::StudyDate.new
-        study_date.type = a.get_attribute('event').value.strip
-        study_date.date = a.get_attribute('date').value.strip
-        dates.push(study_date)
+        unless a.length == 0
+          study_date = DDI::StudyDate.new
+          study_date.type = a.get_attribute('event').value.strip
+          study_date.date = a.get_attribute('date').value.strip
+          dates.push(study_date)
+        end
       end
       study.dates = dates
-      study.sampling_procedure = studynodes[0].find('//sampProc')[0].first.content.strip unless studynodes[0].find('//sampProc')[0] == nil
+      study.sampling_procedure = studynodes[0].find('//sampProc')[0].first.content.strip unless studynodes[0].find('//sampProc')[0].children.size == 0
       # study.weight = studynodes[0].find('//sampProc')[0].first.content
-      study.variables = get_variable_information doc
+      study.ddi_variables = get_variable_information doc
       return study
     end
     
@@ -69,7 +79,7 @@ module DDI
       end
       vars = docnodes[0].find('//dataDscr/var')
       vars.each do |var|
-        variable = DDI::Variable.new
+        variable = DDI::DDIVariable.new
         var_attr = var.attributes
         variable.id = var_attr.get_attribute('ID').value.strip unless var_attr.get_attribute('ID') == nil
         variable.name = var_attr.get_attribute('name').value.strip unless var_attr.get_attribute('name') == nil

@@ -1,3 +1,7 @@
+=v 0.0.2
+* Before parsing xml file with libxml change the character encoding to utf-8
+* Change name of Variable model to DDIVariable
+
 = v 0.0.1
 * Initial upload.  
 * API for parsing a ddi file and returning study and variable information

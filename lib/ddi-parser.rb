@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'libxml'
+require 'iconv'
 require 'models/catalog'
 require 'models/category'
 require 'models/category_statistic'

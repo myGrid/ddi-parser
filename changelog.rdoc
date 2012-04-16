@@ -1,6 +1,9 @@
-= v0.0.4
+= v 0.0.5
+* use latest libxml-ruby
+*
+= v 0.0.4
 * Switch to libxml-ruby 2.2.0
-=v0.0.3
+= v 0.0.3
 * require 'iconv' fix
 
 =v 0.0.2

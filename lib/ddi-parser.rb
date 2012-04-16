@@ -19,6 +19,7 @@ module DDI
       catalog = DDI::Catalog.new
       study = DDI::Study.new
       study_info_hash = Hash.new
+#TODO This will not work on windows since it depends on the unix tool file need to use a different way. Possibly use rchardet instead
       encode_type = `file --mime -br #{ddi_file}`.gsub(/\n/,"").split(';')[1].split('=')[1]
       #have to convert to UTF-8 for libxml
       contents = File.open(ddi_file).read

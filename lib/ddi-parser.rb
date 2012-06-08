@@ -33,13 +33,11 @@ module DDI
       studynodes = doc.find('//stdyDscr')
       abstracts = studynodes[0].find('//abstract')
       abstract = ""
-      abstracts.each do |ab|
-        abstract << ab.content.strip
-      end
+      abstracts.each {|ab| abstract << ab.content.strip}
       abstract.strip!
       study.abstract = abstract
-      study.title = studynodes[0].find('//stdyDscr/citation/titlStmt/titl')[0].first.content.strip
-      study.id = studynodes[0].find('//IDNo')[0].first.content.strip
+      study.title = studynodes[0].find('//stdyDscr/citation/titlStmt/titl')[0].first.content.strip unless studynodes[0].find('//stdyDscr/citation/titlStmt/titl')[0] == nil
+      study.id = studynodes[0].find('//IDNo')[0].first.content.strip unless studynodes[0].find('//IDNo')[0] == nil
       
       #start and finish dates for study
       dates = []
@@ -54,7 +52,10 @@ module DDI
         end
       end
       study.dates = dates
-      study.sampling_procedure = studynodes[0].find('//sampProc')[0].first.content.strip unless studynodes[0].find('//sampProc')[0].children.size == 0
+      studynodes[0].find('//sampProc')[0] ? samp_node = studynodes[0].find('//sampProc')[0] : samp_node = nil
+      unless samp_node == nil
+        study.sampling_procedure = samp_node.first.content.strip unless samp_node.first == nil
+      end
       # study.weight = studynodes[0].find('//sampProc')[0].first.content
       study.ddi_variables = get_variable_information doc
       return study
@@ -74,7 +75,7 @@ module DDI
         groups = a.get_attribute('var')
         if groups != nil
           groups = a.get_attribute('var')
-          variable_info_hash[vargroup.find('./labl')[0].first.content] = groups.value.split(' ')
+          variable_info_hash[vargroup.find('./labl')[0].first.content] = groups.value.split(' ') unless vargroup.find('./labl')[0] == nil
         # else
         #             variable_info_hash[vargroup.find('./labl')[0].first.content] = groups.value.split(' ')
         end
@@ -88,14 +89,20 @@ module DDI
         variable.file = var_attr.get_attribute('files').value.strip unless var_attr.get_attribute('files') == nil
         variable.interval = var_attr.get_attribute('intrvl').value.strip unless var_attr.get_attribute('intrvl') == nil
         variable.label = var.find('./labl')[0].content.strip unless var.find('./labl')[0] == nil 
+        #these things never seem consistent with the schema, might be an inner element, might be an attribute!
+        if var.find('./labl')[0] == nil
+          variable.label = var_attr.get_attribute('labl').value.strip unless var_attr.get_attribute('labl') == nil
+        end
         rng = var.find('./valrng')
         if rng != nil
           if rng[0] != nil
-            range_attr = rng[0].first.attributes
-            max_val = range_attr.get_attribute('max')
-            variable.max = max_val.value.strip unless max_val == nil
-            min_val = range_attr.get_attribute('min')
-            variable.min = min_val.value.strip unless min_val == nil
+            unless rng[0].first == nil
+              range_attr = rng[0].first.attributes
+              max_val = range_attr.get_attribute('max')
+              variable.max = max_val.value.strip unless max_val == nil
+              min_val = range_attr.get_attribute('min')
+              variable.min = min_val.value.strip unless min_val == nil
+            end
           end
         end
         q = var.find('./qstn')

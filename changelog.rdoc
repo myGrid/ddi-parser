@@ -1,3 +1,5 @@
+= v 0.1.0
+* make code more readable and 'ruby like'
 = v 0.0.5
 * use latest libxml-ruby
 *
@@ -6,7 +8,7 @@
 = v 0.0.3
 * require 'iconv' fix
 
-=v 0.0.2
+= v 0.0.2
 * Before parsing xml file with libxml change the character encoding to utf-8
 * Change name of Variable model to DDIVariable
 

@@ -29,9 +29,10 @@ module DDI
 #TODO This will not work on windows since it depends on the unix tool file need to use a different way. Possibly use rchardet instead
       begin
         encode_type = `file --mime -br #{ddi_file}`.gsub(/\n/,"").split(';')[1].split('=')[1]
-      rescue
+      rescue Exception => e
         
       end
+      @logger.info '1'
       #have to convert to UTF-8 for libxml
       contents = File.open(ddi_file).read
       output = Iconv.conv("UTF-8", encode_type, contents)
@@ -46,6 +47,7 @@ module DDI
       abstract = ""
       abstracts.each {|ab| abstract << ab.content.strip}
       abstract.strip!
+      @logger.info '2'
       study.abstract = abstract
       study.title = studynodes[0].find('//stdyDscr/citation/titlStmt/titl')[0].first.content.strip unless studynodes[0].find('//stdyDscr/citation/titlStmt/titl')[0] == nil
       study.id = studynodes[0].find('//IDNo')[0].first.content.strip unless studynodes[0].find('//IDNo')[0] == nil
@@ -62,6 +64,7 @@ module DDI
           dates.push(study_date)
         end
       end
+      @logger.info '3'
       study.dates = dates
       studynodes[0].find('//sampProc')[0] ? samp_node = studynodes[0].find('//sampProc')[0] : samp_node = nil
       unless samp_node == nil
@@ -91,19 +94,25 @@ module DDI
         #             variable_info_hash[vargroup.find('./labl')[0].first.content] = groups.value.split(' ')
         end
       end
+      @logger.info '4'
       vars = docnodes[0].find('//dataDscr/var')
       vars.each do |var|
         variable = DDI::DDIVariable.new
         var_attr = var.attributes
         variable.id = var_attr.get_attribute('ID').value.strip unless var_attr.get_attribute('ID') == nil
         variable.name = var_attr.get_attribute('name').value.strip unless var_attr.get_attribute('name') == nil
+        #if there is no name then it has no meaning or context
+        next if variable.name == nil
         variable.file = var_attr.get_attribute('files').value.strip unless var_attr.get_attribute('files') == nil
         variable.interval = var_attr.get_attribute('intrvl').value.strip unless var_attr.get_attribute('intrvl') == nil
         variable.label = var.find('./labl')[0].content.strip unless var.find('./labl')[0] == nil 
+        @logger.info '5'
         #these things never seem consistent with the schema, might be an inner element, might be an attribute!
         if var.find('./labl')[0] == nil
+          @logger.info '6'
           variable.label = var_attr.get_attribute('labl').value.strip unless var_attr.get_attribute('labl') == nil
         end
+        @logger.info '7'
         rng = var.find('./valrng')
         if rng != nil
           if rng[0] != nil

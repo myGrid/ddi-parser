@@ -1,12 +1,15 @@
 = v 0.1.0
-* make code more readable and 'ruby like'
+* Make code more readable and 'ruby like'
+* Parse variable label from attributes as well as from a node 
+
 = v 0.0.5
-* use latest libxml-ruby
-*
+* Use latest libxml-ruby
+
 = v 0.0.4
 * Switch to libxml-ruby 2.2.0
+
 = v 0.0.3
-* require 'iconv' fix
+* Require 'iconv' fix
 
 = v 0.0.2
 * Before parsing xml file with libxml change the character encoding to utf-8

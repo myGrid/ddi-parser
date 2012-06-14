@@ -1,3 +1,5 @@
 = Introduction
 
 DDI metadata file parser
+
+Parses variable names, labels, variable groups & values from DDI 2.1 xml files.
